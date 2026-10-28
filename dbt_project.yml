@@ -14,3 +14,14 @@ models:
     staging:
       +schema: staging
       +materialized: view
+    silver:
+      +schema: silver_logistica
+      +materialized: table
+    gold:
+      +schema: gold_logistica
+      +materialized: table
+    marts:
+      +schema: mart_logistica
+      +materialized: table
+      +contract:
+        enforced: true
