@@ -1,0 +1,16 @@
+name: reto_datos
+version: "1.0.0"
+config-version: 2
+profile: reto_datos
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  reto_datos:
+    staging:
+      +schema: staging
+      +materialized: view

@@ -6,3 +6,6 @@ logs/
 *.duckdb.wal
 .env
 .DS_Store
+dbt_internal_packages/
+.user.yml
+__pycache__/

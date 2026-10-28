@@ -1,0 +1,83 @@
+version: 2
+
+models:
+  - name: stg_fle__viajes
+    description: Última versión de cada viaje, sin borrados. Estatus normalizado (H1) y 1900-01-01 como nulo (H3).
+    columns:
+      - name: id_viaje
+        data_tests: [unique, not_null]
+      - name: cla_planta
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_opc__plantas')
+                field: cla_planta
+      - name: estatus
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['PRO', 'TRA', 'ENT', 'CAN']
+      - name: fecha_compromiso
+        data_tests: [not_null]
+      - name: fecha_real_embarque
+        data_tests:
+          - not_before:
+              arguments:
+                min_date: '2000-01-01'
+      - name: fecha_embarque_final
+        data_tests:
+          - not_before:
+              arguments:
+                min_date: '2000-01-01'
+
+  - name: stg_fle__viaje_partidas
+    description: Última versión de cada partida, sin borrados. Incluye partidas de viajes borrados o no embarcados; se filtran aguas abajo.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: ['id_viaje', 'id_partida']
+    columns:
+      - name: id_viaje
+        data_tests: [not_null]
+      - name: cla_cliente
+        data_tests: [not_null]
+      - name: peso_kg
+        data_tests: [not_null]
+
+  - name: stg_fle__entregas
+    description: Última versión del comprobante de entrega (POD) por viaje. La fecha puede corregirse entre versiones (H5).
+    columns:
+      - name: id_viaje
+        data_tests: [unique, not_null]
+      - name: fecha_entrega
+        data_tests:
+          - not_null
+          - not_before:
+              arguments:
+                min_date: '2000-01-01'
+
+  - name: stg_opc__plantas
+    description: Catálogo de plantas, última versión.
+    columns:
+      - name: cla_planta
+        data_tests: [unique, not_null]
+      - name: nom_planta
+        data_tests: [not_null]
+
+  - name: stg_vta__clientes_versiones
+    description: Todas las versiones distintas de cada cliente (una por LSN), con segmento normalizado (H2). Insumo del SCD2.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: ['cla_cliente', 'cdc_lsn']
+    columns:
+      - name: cla_cliente
+        data_tests: [not_null]
+      - name: segmento
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['DISTRIBUIDOR', 'CONSTRUCTORA', 'INDUSTRIAL']
