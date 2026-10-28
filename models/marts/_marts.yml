@@ -1,0 +1,64 @@
+version: 2
+
+models:
+  - name: embarques_mensual
+    description: Toneladas, viajes y costo de flete por planta y mes de embarque. Contrato publicado para BI.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: ['anio_mes', 'cla_planta']
+    columns:
+      - name: anio_mes
+        data_type: varchar
+        constraints: [{type: not_null}]
+        data_tests: [not_null]
+      - name: cla_planta
+        data_type: integer
+        constraints: [{type: not_null}]
+        data_tests: [not_null]
+      - name: nom_planta
+        data_type: varchar
+        data_tests: [not_null]
+      - name: num_viajes
+        data_type: integer
+      - name: toneladas_embarcadas
+        data_type: decimal(18, 3)
+      - name: costo_flete_mxn
+        data_type: decimal(18, 2)
+      - name: costo_flete_por_ton
+        data_type: decimal(18, 2)
+        data_tests:
+          - in_range:
+              arguments:
+                min_value: 100
+                max_value: 3000
+
+  - name: cumplimiento_entrega
+    description: Porcentaje de toneladas entregadas a tiempo por segmento del cliente y mes de embarque. Contrato publicado para BI.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: ['anio_mes', 'segmento_cliente']
+    columns:
+      - name: anio_mes
+        data_type: varchar
+        constraints: [{type: not_null}]
+        data_tests: [not_null]
+      - name: segmento_cliente
+        data_type: varchar
+        constraints: [{type: not_null}]
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['DISTRIBUIDOR', 'CONSTRUCTORA', 'INDUSTRIAL', 'NO_IDENTIFICADO']
+      - name: toneladas_entregadas
+        data_type: decimal(18, 3)
+      - name: toneladas_a_tiempo
+        data_type: decimal(18, 3)
+      - name: pct_a_tiempo
+        data_type: decimal(18, 2)
+        data_tests:
+          - in_range:
+              arguments:
+                min_value: 0
+                max_value: 100

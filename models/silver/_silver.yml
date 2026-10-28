@@ -1,0 +1,21 @@
+version: 2
+
+models:
+  - name: int_clientes__segmento_vigencia
+    description: >
+      SCD2 del segmento por cliente. Vigencia por día local de registro (H10); varias versiones el mismo
+      día se resuelven con la última. La primera versión aplica hacia atrás. Un borrado deja segmento nulo.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: ['cla_cliente', 'vigente_desde']
+    columns:
+      - name: cla_cliente
+        data_tests: [not_null]
+      - name: vigente_desde
+        data_tests: [not_null]
+      - name: segmento
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['DISTRIBUIDOR', 'CONSTRUCTORA', 'INDUSTRIAL']

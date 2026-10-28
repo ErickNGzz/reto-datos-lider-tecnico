@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: fct_embarques
+    description: Un renglón por viaje embarcado (TRA o ENT, no borrado), con fecha de embarque, toneladas, costo y puntualidad.
+    columns:
+      - name: id_viaje
+        data_tests: [unique, not_null]
+      - name: fecha_embarque
+        description: FechaRealEmbarque; si no está capturada, FechaEmbarqueFinal (regla 1).
+        data_tests:
+          - not_null
+          - not_before:
+              arguments:
+                min_date: '2000-01-01'
+      - name: costo_flete_mxn
+        data_tests: [not_null]
+      - name: estatus
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['TRA', 'ENT']
+
+  - name: fct_embarque_partidas
+    description: Un renglón por partida de viaje embarcado, con el segmento vigente el día del embarque.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: ['id_viaje', 'id_partida']
+    columns:
+      - name: segmento_cliente
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['DISTRIBUIDOR', 'CONSTRUCTORA', 'INDUSTRIAL', 'NO_IDENTIFICADO']
