@@ -1,0 +1,17 @@
+version: 2
+
+sources:
+  - name: landing_fle
+    description: Réplica Airbyte CDC del sistema de fletes. Todo en texto, una fila por versión.
+    tables:
+      - name: fle_viaje
+      - name: fle_viaje_det
+      - name: fle_entrega
+  - name: landing_vta
+    description: Réplica Airbyte CDC del sistema de ventas.
+    tables:
+      - name: vta_cliente
+  - name: landing_opc
+    description: Réplica Airbyte CDC del sistema de operaciones.
+    tables:
+      - name: opc_planta
