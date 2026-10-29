@@ -12,6 +12,7 @@ El objetivo es el **mecanismo**: qué cambió, por qué eso produce el síntoma 
 1. `make diagnose`. Lee `resumen`, `fallas` y `cambios_sin_commit`.
    - Sin fallas pero el usuario ve algo raro → perfila el mart (`make profile TABLE=mart_logistica.<tabla> PK=<grano>`) y compáralo contra staging con `scripts/query.py`.
 2. **Ubica el origen.** Si hay `cambios_sin_commit`, empieza por `git diff <archivo>`: la causa suele ser código. Si no, es dato: perfila la tabla de landing o staging del `linaje` más cercana al síntoma.
+   - **Si la causa es un cambio sin commit, `main` está sano.** No abras PR: explica el mecanismo, recomienda descartar el cambio (`git restore <archivo>`, lo ejecuta la persona) o, si era intencional, corregirlo antes de commitear. Abre PR solo cuando el defecto está en código ya publicado en `main` o en los datos.
 3. **Formula una hipótesis** con el catálogo de abajo y **confírmala con una consulta** (`python scripts/query.py "..."`). No propongas fix sin evidencia.
 4. **Corrige en una rama** `fix/<desc>`, en la capa donde nace el problema (no parches en el mart lo que viene de staging).
 5. `make diagnose` otra vez: debe quedar sin fallas. Luego skill `abrir-pr`.
@@ -38,7 +39,7 @@ Si el fix requiere full-refresh, borrar datos o cambiar el contrato de un mart �
 
 - **Mecanismo:** qué cambió y por qué produce el síntoma, en una o dos frases.
 - **Evidencia:** cifras de `diagnose`/`query` (filas, meses, llaves de ejemplo).
-- **Impacto en el negocio:** qué indicador y cuánto se mueve (toneladas, %, meses).
+- **Impacto en el negocio:** qué indicador y cuánto se mueve, **con cifras antes y después** consultadas en el mart (formato: "% a tiempo de <segmento> en <mes>: X% correcto vs Y% con el defecto"). Sin cifras no está terminado.
 - **Fix:** archivo y cambio.
 - **Prevención:** qué test lo atrapa ya o cuál agregar.
 - **Escalar al origen:** solo si el dato viene mal de la fuente.
