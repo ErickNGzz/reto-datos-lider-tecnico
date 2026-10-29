@@ -2,7 +2,7 @@
     Grano: un viaje embarcado.
     Regla 2: solo TRA y ENT. Regla 1: fecha real, si no la final (hora local de planta).
     Regla 5: a tiempo si la fecha de entrega del POD es menor o igual a la fecha compromiso,
-    comparando fechas: el compromiso no trae hora (H8).
+    comparando fechas (cast a date): el compromiso no trae hora (H8).
 -#}
 with viajes as (
     select * from {{ ref('stg_fle__viajes') }}
