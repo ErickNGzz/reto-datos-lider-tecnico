@@ -26,7 +26,7 @@ profile:
 
 # El agente solo ve el contexto y las skills de este repo, no los de la máquina de quien lo corre.
 agent:
-	OPENCODE_DISABLE_CLAUDE_CODE=1 opencode
+	OPENCODE_DISABLE_CLAUDE_CODE=1 GOOGLE_GENERATIVE_AI_API_KEY="$${GOOGLE_GENERATIVE_AI_API_KEY:-$$GEMINI_API_KEY}" opencode
 
 # Destructivos: solo corren con la variable que entrega el environment production aprobado.
 full-refresh:
