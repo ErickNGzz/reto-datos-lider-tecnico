@@ -1,0 +1,64 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  idempotencia:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - run: make setup
+
+      - name: Corrida 1
+        run: make run | tee corrida_1.txt
+
+      - name: Corrida 2 (misma entrega)
+        run: make run | tee corrida_2.txt
+
+      - name: La segunda ingesta omite todo lo ya cargado
+        run: |
+          .venv/bin/python scripts/ingest.py > ingesta_3.json
+          if grep -v '"estado": "omitido"' ingesta_3.json | grep -q '"estado"'; then
+            echo "::error::Una entrega ya ingerida se volvió a cargar"; cat ingesta_3.json; exit 1
+          fi
+
+      - name: Conteos idénticos entre corridas
+        run: |
+          grep -E '^[a-z_]+\.[a-z_]+: [0-9]+$' corrida_1.txt > conteos_1.txt
+          grep -E '^[a-z_]+\.[a-z_]+: [0-9]+$' corrida_2.txt > conteos_2.txt
+          { echo '### Conteos (corrida 1 = corrida 2)'; echo '```'; cat conteos_2.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          diff conteos_1.txt conteos_2.txt
+
+      - name: La guardia bloquea full-refresh sin aprobación
+        env:
+          DBT_PROFILES_DIR: .
+        run: |
+          if .venv/bin/dbt --no-use-colors run --full-refresh --select embarques_mensual > guardia.log 2>&1; then
+            echo "::error::full-refresh corrió sin aprobación"; exit 1
+          fi
+          grep -q "full-refresh bloqueado" guardia.log
+
+  secretos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
