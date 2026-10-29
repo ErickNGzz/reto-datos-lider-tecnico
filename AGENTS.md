@@ -14,6 +14,8 @@ Llevas tablas replicadas (Airbyte CDC) hasta marts con calidad de producción, s
 | `docs/` | Requerimiento, contrato de marts, diccionario de landing, convenciones |
 | `HALLAZGOS.md` | Problemas reales de los datos ya conocidos y cómo se resolvieron |
 
+Esquemas en `deacero.duckdb` (no hace falta explorarlos): `landing` (manifiesto de ingesta), `landing_fle`, `landing_vta`, `landing_opc` (réplica tal cual), `staging`, `silver_logistica`, `gold_logistica`, `mart_logistica`. Las columnas de cada modelo están en los `.yml` de su carpeta.
+
 ## Herramientas (devuelven JSON compacto; úsalas antes de razonar)
 
 | Comando | Para qué |
