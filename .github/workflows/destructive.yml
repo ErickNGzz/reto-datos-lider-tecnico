@@ -1,0 +1,84 @@
+# Operaciones destructivas: el job `plan` muestra el impacto y `ejecutar` espera la aprobación
+# de un revisor en el environment production. En BigQuery, las credenciales de escritura a
+# producción vivirían como secrets de ese environment: sin aprobación, el job no las recibe.
+name: destructive
+
+on:
+  workflow_dispatch:
+    inputs:
+      operacion:
+        description: Operación destructiva
+        type: choice
+        options: [full-refresh, reset-landing]
+      seleccion:
+        description: Capa a recrear (solo full-refresh)
+        type: choice
+        options: [marts, gold, silver, staging]
+      motivo:
+        description: Por qué se necesita y qué se espera que cambie
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: destructive
+  cancel-in-progress: false
+
+env:
+  OPERACION: ${{ inputs.operacion }}
+  SELECCION: ${{ inputs.seleccion }}
+  MOTIVO: ${{ inputs.motivo }}
+  DBT_PROFILES_DIR: .
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - run: make setup
+      - run: make run > antes.txt
+      - name: Impacto
+        run: |
+          if [ "$OPERACION" = full-refresh ]; then
+            .venv/bin/dbt --no-use-colors -q ls --select "${SELECCION}+" --resource-type model --output name > afectados.txt
+          else
+            echo "landing completo + manifiesto de ingesta; se reingieren todas las entregas y se recrea todo aguas abajo" > afectados.txt
+          fi
+          {
+            echo "### Solicitud: \`$OPERACION\`"
+            echo "Solicitó: ${GITHUB_ACTOR} · Motivo: $MOTIVO"
+            echo "#### Modelos afectados"; echo '```'; cat afectados.txt; echo '```'
+            echo "#### Conteos actuales"; echo '```'; grep -E '^[a-z_]+\.[a-z_]+: [0-9]+$' antes.txt; echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  ejecutar:
+    needs: plan
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      APROBACION_DESTRUCTIVA: ${{ vars.APROBACION_DESTRUCTIVA }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - run: make setup
+      - run: make run
+      - name: Ejecutar
+        run: |
+          case "$OPERACION" in
+            full-refresh)  make full-refresh SELECT="$SELECCION" ;;
+            reset-landing) make reset-landing ;;
+          esac
+      - name: Resultado
+        run: |
+          { echo "### Ejecutado tras aprobación: \`$OPERACION\`"; echo '```'; make -s counts; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
