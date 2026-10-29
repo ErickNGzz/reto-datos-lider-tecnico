@@ -1,7 +1,7 @@
-"""Perfila una tabla landing (CSV de réplica CDC) y devuelve un resumen JSON compacto.
+"""Perfila una tabla (CSV de réplica CDC o tabla de la base) y devuelve un resumen JSON compacto.
 
 Uso:
-    python scripts/profile_table.py <archivo.csv> --pk Col1[,Col2] [--lsn _ab_cdc_lsn]
+    python scripts/profile_table.py <archivo.csv | esquema.tabla> --pk Col1[,Col2] [--lsn _ab_cdc_lsn]
 """
 import argparse
 import json
@@ -9,11 +9,16 @@ import duckdb
 
 SENTINELS = ["1900-01-01", "0", "-1", "9999-12-31", "N/A", "NULL", "null", ""]
 LOW_CARDINALITY = 30
+DB = "deacero.duckdb"
 
 
-def profile(path, pk, lsn):
+def profile(path, pk, lsn, db=DB):
     con = duckdb.connect()
-    con.execute(f"create view t as select * from read_csv('{path}', all_varchar=true, header=true)")
+    if path.endswith(".csv"):
+        con.execute(f"create view t as select * from read_csv('{path}', all_varchar=true, header=true)")
+    else:
+        con.execute(f"attach '{db}' as base (read_only)")
+        con.execute(f"create view t as select columns(*)::varchar from base.{path}")
     cols = [r[0] for r in con.execute("describe t").fetchall()]
     keys = ", ".join(pk)
     has_lsn = lsn in cols
