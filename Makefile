@@ -4,7 +4,7 @@ export DBT_PROFILES_DIR := .
 
 SELECT ?= marts
 
-.PHONY: setup ingest build run counts full-refresh reset-landing
+.PHONY: setup ingest build run counts diagnose profile agent full-refresh reset-landing
 
 setup:
 	python3 -m venv .venv
@@ -17,6 +17,16 @@ build:
 	$(DBT) build
 
 run: ingest build counts
+
+diagnose:
+	@$(PY) scripts/diagnose.py $(if $(SELECT_DIAG),--select $(SELECT_DIAG))
+
+profile:
+	@$(PY) scripts/profile_table.py $(TABLE) --pk $(PK)
+
+# El agente solo ve el contexto y las skills de este repo, no los de la máquina de quien lo corre.
+agent:
+	OPENCODE_DISABLE_CLAUDE_CODE=1 opencode
 
 # Destructivos: solo corren con la variable que entrega el environment production aprobado.
 full-refresh:
