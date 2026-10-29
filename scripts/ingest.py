@@ -11,6 +11,7 @@ Uso:
 import argparse
 import hashlib
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -86,4 +87,6 @@ if __name__ == "__main__":
     p.add_argument("folders", nargs="*")
     a = p.parse_args()
     folders = a.folders or sorted(str(d) for d in REPLICA.iterdir() if d.is_dir())
-    print(json.dumps(ingest(folders), ensure_ascii=False, indent=1))
+    report = ingest(folders)
+    print(json.dumps(report, ensure_ascii=False, indent=1))
+    sys.exit(1 if any(r["estado"] == "error" for r in report) else 0)

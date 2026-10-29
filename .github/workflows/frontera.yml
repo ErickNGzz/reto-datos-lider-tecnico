@@ -1,0 +1,42 @@
+# Un PR que toca el contrato de los marts o la propia frontera necesita aprobación humana
+# en el environment contract-change. Corre con pull_request_target para usar la versión de
+# main de este workflow: un PR no puede apagar su propio control. No hace checkout del PR;
+# solo lee la lista de archivos por la API.
+name: frontera
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  detectar:
+    runs-on: ubuntu-latest
+    outputs:
+      requiere: ${{ steps.archivos.outputs.requiere }}
+    steps:
+      - id: archivos
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --paginate --jq '.[].filename' > archivos.txt
+          grep -E '^(models/marts/|\.github/|macros/guardia_destructiva\.sql|dbt_project\.yml|Makefile|opencode\.json|scripts/setup_github\.sh)' archivos.txt > sensibles.txt || true
+          if [ -s sensibles.txt ]; then
+            echo "requiere=true" >> "$GITHUB_OUTPUT"
+            { echo "### Requiere aprobación: el PR toca contrato o frontera"; echo '```'; cat sensibles.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "requiere=false" >> "$GITHUB_OUTPUT"
+            echo "### Sin cambios de contrato ni de frontera" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  aprobacion:
+    needs: detectar
+    if: needs.detectar.outputs.requiere == 'true'
+    runs-on: ubuntu-latest
+    environment: contract-change
+    steps:
+      - run: echo "Cambio de contrato/frontera aprobado por un revisor humano." >> "$GITHUB_STEP_SUMMARY"
