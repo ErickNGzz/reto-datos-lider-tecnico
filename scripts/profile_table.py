@@ -76,7 +76,7 @@ def profile(path, pk, lsn, db=DB):
                     f"select count(distinct upper(trim({q}))) from t").fetchone()[0]
         sentinels = {}
         for s in SENTINELS:
-            n = con.execute(f"select count(*) from t where trim({q}) = ? or {q} like ? || ' %'", [s, s]).fetchone()[0]
+            n = con.execute(f"select count(*) from t where trim({q}) = ? or (? <> '' and {q} like ? || ' %')", [s, s, s]).fetchone()[0]
             if n:
                 sentinels[s] = n
         if sentinels:
