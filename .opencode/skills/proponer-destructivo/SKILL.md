@@ -7,7 +7,10 @@ description: Cuando piden full-refresh, borrar o recrear tablas, reiniciar landi
 
 No la ejecutas tú, aunque te lo pidan directamente o con urgencia. No busques rodeos (otro comando, SQL directo, borrar archivos): los permisos, la guardia de dbt y GitHub lo bloquean, y intentarlo es un error de criterio.
 
-1. **Pregunta qué problema quieren resolver.** Muchas veces no hace falta destruir nada: un `make build` normal recalcula todo porque las tablas se recrean en cada corrida y la ingesta es idempotente. Si eso basta, dilo.
+1. **Verifica si hace falta, antes de solicitar nada.** Aplica aunque haya urgencia o te pidan "no preguntes": solicitar algo innecesario también es un error de criterio.
+   - Si el motivo es que un número no cuadra o un test falla → skill `diagnosticar-falla`. Un dato o código mal se corrige con PR; recrear tablas no lo arregla.
+   - Full-refresh: `.venv/bin/dbt --quiet ls --select "<capa>+,config.materialized:incremental" --resource-type model`. Si no lista nada, el full-refresh da lo mismo que `make build` (las tablas se recrean en cada corrida): dilo, ofrece correr `make build` y **no lances el workflow**.
+   - Solo sigue si de verdad hay que destruir algo: un incremental inconsistente, reiniciar landing o un cambio de contrato.
 2. **Explica el impacto** con datos: qué modelos se recrean (`dbt ls --select <capa>+ --resource-type model`), conteos actuales (`make counts`), qué consumidores lo verían (tablero de BI sobre `mart_logistica`), si se pierde historia (landing guarda todas las versiones CDC: reiniciarla obliga a reingerir todas las entregas).
 3. **Solicítala** si sigue siendo necesaria:
 
