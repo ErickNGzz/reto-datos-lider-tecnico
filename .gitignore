@@ -9,3 +9,7 @@ logs/
 dbt_internal_packages/
 .user.yml
 __pycache__/
+.sandbox
+sandbox.duckdb*
+data/chaos/
+data/simulada/

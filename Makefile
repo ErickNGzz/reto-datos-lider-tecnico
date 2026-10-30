@@ -4,7 +4,11 @@ export DBT_PROFILES_DIR := .
 
 SELECT ?= marts
 
-.PHONY: setup ingest build run counts diagnose profile agent full-refresh reset-landing
+# Base de trabajo: la real, o la copia de pruebas mientras exista .sandbox.
+DUCKDB_PATH ?= $(shell cat .sandbox 2>/dev/null || echo deacero.duckdb)
+export DUCKDB_PATH
+
+.PHONY: setup ingest build run counts diagnose profile agent full-refresh reset-landing sandbox sandbox-fin
 
 setup:
 	python3 -m venv .venv
@@ -35,11 +39,24 @@ full-refresh:
 reset-landing:
 	@test "$$APROBACION_DESTRUCTIVA" = production || { \
 		echo "reset-landing bloqueado: borra landing y el manifiesto; requiere aprobación en el environment production."; exit 1; }
-	$(PY) -c "import duckdb; c = duckdb.connect('deacero.duckdb'); \
+	$(PY) -c "import duckdb; c = duckdb.connect('$(DUCKDB_PATH)'); \
 	[c.execute(f'drop schema {s} cascade') for (s,) in c.execute(\"select schema_name from information_schema.schemata where schema_name like 'landing%'\").fetchall()]"
 	$(MAKE) run
 
+# Copia desechable de la base para chaos y entregas simuladas; la real no se toca.
+sandbox:
+	@test ! -f .sandbox || { echo "Ya hay una base de pruebas activa ($$(cat .sandbox)). Termínala con: make sandbox-fin"; exit 1; }
+	@test -f deacero.duckdb || { echo "No existe la base real: corre make run primero."; exit 1; }
+	cp deacero.duckdb sandbox.duckdb
+	@echo sandbox.duckdb > .sandbox
+	@echo "Base de pruebas activa: sandbox.duckdb. Todo comando make y script trabaja sobre ella hasta make sandbox-fin."
+
+sandbox-fin:
+	rm -f sandbox.duckdb sandbox.duckdb.wal .sandbox
+	@echo "Base de pruebas eliminada. De nuevo sobre deacero.duckdb."
+
 counts:
-	@$(PY) -c "import duckdb; c = duckdb.connect('deacero.duckdb', read_only=True); \
+	@echo "base: $(DUCKDB_PATH)"
+	@$(PY) -c "import duckdb; c = duckdb.connect('$(DUCKDB_PATH)', read_only=True); \
 	[print(f'{s}.{t}: {c.execute(f\"select count(*) from {s}.{t}\").fetchone()[0]}') \
 	 for s, t in c.execute(\"select table_schema, table_name from information_schema.tables where table_schema not in ('information_schema','pg_catalog') order by 1, 2\").fetchall()]"

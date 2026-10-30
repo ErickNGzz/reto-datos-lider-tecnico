@@ -3,6 +3,6 @@ reto_datos:
   outputs:
     dev:
       type: duckdb
-      path: deacero.duckdb
+      path: "{{ env_var('DUCKDB_PATH', 'deacero.duckdb') }}"
       schema: main
       threads: 4

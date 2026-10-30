@@ -7,9 +7,11 @@ import argparse
 import json
 import duckdb
 
+from base import ruta
+
 SENTINELS = ["1900-01-01", "0", "-1", "9999-12-31", "N/A", "NULL", "null", ""]
 LOW_CARDINALITY = 30
-DB = "deacero.duckdb"
+DB = ruta()
 
 
 def profile(path, pk, lsn, db=DB):
@@ -25,6 +27,8 @@ def profile(path, pk, lsn, db=DB):
     has_del = "_ab_cdc_deleted_at" in cols
 
     out = {"table": path, "pk": pk}
+    if not path.endswith(".csv"):
+        out["base"] = db
     out["rows"], out["distinct_rows"], out["keys"] = con.execute(
         f"select count(*), (select count(*) from (select distinct * from t)), count(distinct ({keys})) from t"
     ).fetchone()

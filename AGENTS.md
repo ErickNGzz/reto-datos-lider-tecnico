@@ -16,6 +16,8 @@ Llevas tablas replicadas (Airbyte CDC) hasta marts con calidad de producción, s
 
 Esquemas en `deacero.duckdb` (no hace falta explorarlos): `landing` (manifiesto de ingesta), `landing_fle`, `landing_vta`, `landing_opc` (réplica tal cual), `staging`, `silver_logistica`, `gold_logistica`, `mart_logistica`. Las columnas de cada modelo están en los `.yml` de su carpeta.
 
+**Base de pruebas:** si existe `.sandbox`, todos los comandos y scripts trabajan sobre una copia (`sandbox.duckdb`) y la base real no se toca; las salidas lo indican en `base`. La crea y la elimina una persona (`make sandbox` / `make sandbox-fin`). Una entrega en `data/chaos/` o `data/simulada/` es un dato de prueba, no un cambio de código.
+
 ## Herramientas (devuelven JSON compacto; úsalas antes de razonar)
 
 | Comando | Para qué |
