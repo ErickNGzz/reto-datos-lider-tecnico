@@ -28,3 +28,7 @@ Si no conoces la PK, búscala en `docs/diccionario-landing.md` o prueba candidat
 ## Reporte
 
 Tabla, filas, llaves, y una lista corta de **hallazgos con impacto** ("12% de los estatus vienen en minúsculas: sin limpiar, esos viajes no cuentan como embarcados"). Cada hallazgo con su tratamiento estándar y si hay que escalarlo al dueño del origen.
+
+- Cita valores y cifras **tal como vienen en el JSON**; no inventes ejemplos. En códigos sucios di a cuántos valores reales colapsan (`variants_after_upper_trim`).
+- Si la tabla ya está modelada (`models/staging/stg_*`, `HALLAZGOS.md`), di qué hallazgos ya resuelve staging y cuáles siguen abiertos.
+- Cierra con dos respuestas separadas: **confiabilidad de la fuente** (tal como llega) y **confiabilidad de lo que ve negocio** (el mart, después de la limpieza y los tests).
