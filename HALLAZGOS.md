@@ -26,7 +26,7 @@ Problemas encontrados en la réplica que no estaban en la documentación. Cada u
 
 ## H1 · `Estatus` con 20 variantes de escritura
 
-- **Qué vi:** además de `PRO`, `TRA`, `ENT`, `CAN` aparecen `Pro`, `pro`, `Tra`, ` ENT`, `TRA `, `Can`… (20 variantes en total, ~830 de 5,850 filas).
+- **Qué vi:** además de `PRO`, `TRA`, `ENT`, `CAN` aparecen `Pro`, `pro`, `Tra`, ` ENT`, `TRA `, `Can`… (20 variantes en total que colapsan a 4; 672 de 5,850 filas: 337 con espacios y 335 en minúsculas).
 - **Cómo lo detecté:** distribución de valores de la columna cruda.
 - **Impacto:** un filtro literal `Estatus in ('TRA','ENT')` deja fuera viajes embarcados: menos toneladas y menos costo, sin error.
 - **Resolución:** `upper(trim(Estatus))` en staging + test `accepted_values` sobre el valor normalizado. Si llega un valor nuevo, el test falla en lugar de excluirlo en silencio.
