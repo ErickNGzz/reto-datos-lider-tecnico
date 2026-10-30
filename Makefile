@@ -8,7 +8,7 @@ SELECT ?= marts
 DUCKDB_PATH ?= $(shell cat .sandbox 2>/dev/null || echo deacero.duckdb)
 export DUCKDB_PATH
 
-.PHONY: setup ingest build run counts diagnose profile agent full-refresh reset-landing sandbox sandbox-fin
+.PHONY: setup ingest build run counts diagnose profile agent full-refresh reset-landing sandbox simular sandbox-fin
 
 setup:
 	python3 -m venv .venv
@@ -50,6 +50,13 @@ sandbox:
 	cp deacero.duckdb sandbox.duckdb
 	@echo sandbox.duckdb > .sandbox
 	@echo "Base de pruebas activa: sandbox.duckdb. Todo comando make y script trabaja sobre ella hasta make sandbox-fin."
+
+simular:
+	@test -f .sandbox || { echo "La entrega simulada solo se carga en la base de pruebas: corre make sandbox primero."; exit 1; }
+	$(PY) scripts/simular_entrega.py
+	$(PY) scripts/ingest.py data/simulada/carga_2
+	$(DBT) build
+	@$(MAKE) --no-print-directory counts
 
 sandbox-fin:
 	rm -f sandbox.duckdb sandbox.duckdb.wal .sandbox
