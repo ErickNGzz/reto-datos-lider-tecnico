@@ -12,8 +12,9 @@ La ingesta es idempotente: reingerir una entrega o correr todo dos veces no dupl
 3. Lee el reporte JSON:
    - `cargado` → filas nuevas; revisa `columnas_nuevas` (schema drift).
    - `omitido` → ya se había cargado (mismo hash): normal en reenvíos.
+   - `rechazado` → no cumple el contrato mínimo de entrega (`motivos`: faltan columnas CDC, sin filas, LSN o fecha CDC ilegibles). No se cargó nada ni quedó en el manifiesto: es un problema del origen, escálalo con el motivo; cuando lo reenvíen corregido entra normal.
    - `error` → detente y aplica `diagnosticar-falla`. La ingesta hizo rollback de ese archivo.
-   - Un archivo cargado con 0 filas o sin las columnas de llave/CDC es sospechoso: perfílalo.
+   - El contrato es estructural: un valor raro dentro de una columna (p. ej. comillas sueltas en un código) sí se carga y lo atrapan los tests de staging.
 4. `make diagnose`. Si hay fallas → `diagnosticar-falla`.
 5. **Después:** `make counts` y reporta deltas.
 
