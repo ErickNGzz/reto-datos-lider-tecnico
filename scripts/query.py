@@ -8,7 +8,9 @@ import json
 
 import duckdb
 
-DB = "deacero.duckdb"
+from base import ruta
+
+DB = ruta()
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()

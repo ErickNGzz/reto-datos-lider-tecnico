@@ -16,7 +16,9 @@ from pathlib import Path
 
 import duckdb
 
-DB = "deacero.duckdb"
+from base import ruta
+
+DB = ruta()
 TARGET = Path("target")
 LOG = Path("logs/diagnose_dbt.log")
 LAYERS = ["staging", "silver", "gold", "marts"]
@@ -27,7 +29,7 @@ def run_dbt(select):
     LOG.parent.mkdir(exist_ok=True)
     cmd = [".venv/bin/dbt", "--no-use-colors", "build"] + (["--select", select] if select else [])
     with LOG.open("w") as f:
-        subprocess.run(cmd, stdout=f, stderr=subprocess.STDOUT, env={**os.environ, "DBT_PROFILES_DIR": "."})
+        subprocess.run(cmd, stdout=f, stderr=subprocess.STDOUT, env={**os.environ, "DBT_PROFILES_DIR": ".", "DUCKDB_PATH": DB})
 
 
 def layer(node):
@@ -116,6 +118,7 @@ def diagnose():
         failures.append(item)
 
     return {
+        "base": DB,
         "resumen": summary,
         "fallas": failures,
         "omitidos_por_falla_previa": skipped,

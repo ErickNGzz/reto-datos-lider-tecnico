@@ -18,7 +18,9 @@ from pathlib import Path
 
 import duckdb
 
-DB = "deacero.duckdb"
+from base import ruta
+
+DB = ruta()
 REPLICA = Path("data/replica")
 CDC_COLS = ["_ab_cdc_lsn", "_ab_cdc_updated_at", "_ab_cdc_deleted_at"]
 
