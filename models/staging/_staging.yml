@@ -81,3 +81,20 @@ models:
           - accepted_values:
               arguments:
                 values: ['DISTRIBUIDOR', 'CONSTRUCTORA', 'INDUSTRIAL']
+
+  - name: stg_fle__incidencias
+    description: Última versión de cada incidencia, sin borrados. Tipos normalizados y fecha de incidencia.
+    columns:
+      - name: id_incidencia
+        data_tests: [unique, not_null]
+      - name: id_viaje
+        data_tests: [not_null]
+      - name: tipo_incidencia
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['RETRASO', 'DANO', 'FALTANTE']
+      - name: toneladas_afectadas
+        data_tests: [not_null]
+

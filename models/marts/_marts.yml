@@ -62,3 +62,37 @@ models:
               arguments:
                 min_value: 0
                 max_value: 100
+
+  - name: incidencias_mensual
+    description: Tablero mensual de incidencias por planta y tipo de incidencia (número de incidencias, viajes afectados y toneladas afectadas). Contrato publicado para BI.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: ['anio_mes', 'cla_planta', 'tipo_incidencia']
+    columns:
+      - name: anio_mes
+        data_type: varchar
+        constraints: [{type: not_null}]
+        data_tests: [not_null]
+      - name: cla_planta
+        data_type: integer
+        constraints: [{type: not_null}]
+        data_tests: [not_null]
+      - name: nom_planta
+        data_type: varchar
+        data_tests: [not_null]
+      - name: tipo_incidencia
+        data_type: varchar
+        constraints: [{type: not_null}]
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['RETRASO', 'DANO', 'FALTANTE']
+      - name: num_incidencias
+        data_type: integer
+      - name: viajes_afectados
+        data_type: integer
+      - name: toneladas_afectadas
+        data_type: decimal(18, 3)
+

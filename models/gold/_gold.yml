@@ -34,3 +34,19 @@ models:
           - accepted_values:
               arguments:
                 values: ['DISTRIBUIDOR', 'CONSTRUCTORA', 'INDUSTRIAL', 'NO_IDENTIFICADO']
+
+  - name: fct_incidencias
+    description: Un renglón por incidencia de viaje vigente, con planta y toneladas afectadas (regla 3 NO_IDENTIFICADO si el viaje no existe).
+    columns:
+      - name: id_incidencia
+        data_tests: [unique, not_null]
+      - name: tipo_incidencia
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['RETRASO', 'DANO', 'FALTANTE']
+      - name: nom_planta
+        data_tests:
+          - not_null
+

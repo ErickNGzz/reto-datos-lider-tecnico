@@ -33,3 +33,17 @@ Tipos: `texto`, `entero`, `decimal`. Redondeo: toneladas a 3 decimales, dinero y
 | `toneladas_entregadas` | decimal | Toneladas de partidas cuyo viaje ya tiene POD. |
 | `toneladas_a_tiempo` | decimal | De las anteriores, las entregadas a tiempo. |
 | `pct_a_tiempo` | decimal | `100 * toneladas_a_tiempo / toneladas_entregadas` (0 a 100). |
+
+## 3. `incidencias_mensual`
+
+**Grano:** una fila por `anio_mes` × `cla_planta` × `tipo_incidencia`.
+
+| Columna | Tipo | Definición |
+|---|---|---|
+| `anio_mes` | texto | Mes de la fecha de incidencia, `YYYY-MM`. |
+| `cla_planta` | entero | Planta (o -1 si el viaje no existe). |
+| `nom_planta` | texto | Nombre de la planta (o `NO_IDENTIFICADO` si el viaje no existe). |
+| `tipo_incidencia` | texto | `RETRASO`, `DANO` o `FALTANTE`. |
+| `num_incidencias` | entero | Número de incidencias vigentes. |
+| `viajes_afectados` | entero | Número de viajes distintos afectados. |
+| `toneladas_afectadas` | decimal | Suma de toneladas afectadas. |
