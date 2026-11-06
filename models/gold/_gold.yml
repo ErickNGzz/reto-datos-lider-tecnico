@@ -19,7 +19,7 @@ models:
         data_tests:
           - accepted_values:
               arguments:
-                values: ['TRA', 'ENT']
+                values: ['TRA', 'ENT', 'EMB']
 
   - name: fct_embarque_partidas
     description: Un renglón por partida de viaje embarcado, con el segmento vigente el día del embarque.

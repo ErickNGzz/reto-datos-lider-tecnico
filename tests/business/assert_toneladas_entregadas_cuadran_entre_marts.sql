@@ -12,7 +12,7 @@ with esperado as (
     from {{ ref('stg_fle__viaje_partidas') }} p
     join {{ ref('stg_fle__viajes') }} v on v.id_viaje = p.id_viaje
     join {{ ref('stg_fle__entregas') }} e on e.id_viaje = p.id_viaje
-    where v.estatus in ('TRA', 'ENT')
+    where v.estatus in ('TRA', 'ENT', 'EMB')
     group by 1
 ),
 

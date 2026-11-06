@@ -11,7 +11,7 @@ with esperado as (
     from {{ ref('stg_fle__viaje_partidas') }} p
     join {{ ref('stg_fle__viajes') }} v on v.id_viaje = p.id_viaje
     left join {{ ref('zona_horaria_planta') }} z on z.cla_planta = v.cla_planta
-    where v.estatus in ('TRA', 'ENT')
+    where v.estatus in ('TRA', 'ENT', 'EMB')
     group by 1, 2
 ),
 

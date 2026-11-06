@@ -12,7 +12,7 @@ with viajes as (
         coalesce(z.zona_horaria, 'America/Monterrey') as zona_horaria
     from {{ ref('stg_fle__viajes') }} v
     left join {{ ref('zona_horaria_planta') }} z on z.cla_planta = v.cla_planta
-    where v.estatus in ('TRA', 'ENT')
+    where v.estatus in ('TRA', 'ENT', 'EMB')
 ),
 
 partidas as (
