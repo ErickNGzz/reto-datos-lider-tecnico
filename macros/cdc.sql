@@ -27,7 +27,11 @@
     upper(trim({{ column }}))
 {%- endmacro %}
 
-{#- Fecha del origen; 1900-01-01 es el centinela de "no capturado". -#}
+{#- Fecha del origen; 1900-01-01 es el centinela de "no capturado". Soporta YYYY-MM-DD y DD/MM/YYYY. -#}
 {% macro source_timestamp(column) -%}
-    case when {{ column }} like '1900-01-01%' then null else cast({{ column }} as timestamp) end
+    case 
+        when {{ column }} is null or {{ column }} like '1900-01-01%' then null
+        when {{ column }} like '%/%' then strptime({{ column }}, '%d/%m/%Y %H:%M:%S')::timestamp
+        else cast({{ column }} as timestamp)
+    end
 {%- endmacro %}
